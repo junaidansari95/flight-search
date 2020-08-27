@@ -1,7 +1,8 @@
+/*eslint-disable*/
 import React from 'react';
 import 'antd/dist/antd.css';
 import Flights from '../data';
-import { Tabs, Row, Space, Button, DatePicker, Select, Typography } from 'antd';
+import { Tabs, Row, Space, Button, DatePicker, Select, Typography, Slider } from 'antd';
 import moment from 'moment';
 const plane = require('../assets/aircraft.png');
 const { Title, Text } = Typography;
@@ -44,6 +45,8 @@ export default () => {
     const [returnDate, setReturnDate] = React.useState('');
     const [showOneWay, setShowOneWay] = React.useState(false);
     const [showReturn, setShowReturn] = React.useState(false);
+    const [minPrice, setMinPrice] = React.useState(200);
+    const [maxPrice, setMaxPrice] = React.useState(999);
     const onDepartureChange = (value) => {
         if (value) {
             const { _d } = value;
@@ -83,6 +86,11 @@ export default () => {
         }
         console.log("RETURN FLIGHTS:", myFlights, myReturnFlights)
     }
+    const onSliderChange = (value) => {
+        console.log("value1: ", value[0], "value2: ", value[1]);
+        setMinPrice(value[0]);
+        setMaxPrice(value[1]);
+    }
     return (
         <Space direction="vertical">
             <Row justify="flex-start">
@@ -106,6 +114,8 @@ export default () => {
                                 }
                             </Select>
                             <Button type="primary" style={{ width: '100%' }} onClick={onOneWaySearch}>Search</Button>
+                            <Text style={{ textAlign:'center'}}>Refine flight search</Text>
+                            <Slider range min={100} max={1000} defaultValue={[200, 999]} onChange={onSliderChange} />
                         </Space>
                     </TabPane>
                     <TabPane tab="Return" key="2">
@@ -128,6 +138,8 @@ export default () => {
                                 }
                             </Select>
                             <Button type="primary" style={{ width: '100%' }} onClick={onReturnSearch}>Search</Button>
+                            <Text style={{ textAlign:'center'}}>Refine flight search</Text>
+                            <Slider range min={100} max={1000} defaultValue={[200, 999]} onChange={onSliderChange} />
                         </Space>
                     </TabPane>
                 </Tabs>
@@ -138,6 +150,7 @@ export default () => {
                     </Space> : null}
                     {
                         (showOneWay) ? flightResults.map(flight => {
+                            if(flight.amount >= minPrice && flight.amount <= maxPrice)
                             return <Space direction="horizontal" key={flight.flight.number} style={{ width: '100%', background: '#fafafa', justifyContent: "space-between", padding: 18, margin: 10 }}>
                                 <Space direction="vertical" style={{ width: 300 }}>
                                     <Text>Airlines: {flight.airline.name}</Text>
@@ -167,6 +180,7 @@ export default () => {
                             let amount2 = passengers ? passengers * returnFlightResults.amount : returnFlightResults.amount;
                             let totalPrice = parseInt(amount1) + parseInt(amount2);
                             console.log("Total price: ", totalPrice)
+                            if(flight.amount >= minPrice && flight.amount <= maxPrice)
                             return <Space direction="horizontal" key={flight.flight.number} style={{ width: '100%', background: '#fafafa', justifyContent: "space-between", padding: 18, margin: 10 }}>
                                 <Space direction="vertical" style={{ width: 300 }}>
                                     <Text>Airlines: {flight.airline.name}</Text>
@@ -203,7 +217,7 @@ export default () => {
                 <Text>Note: Due to pandemic only the following flights are scheduled and the prices are uncertain.</Text>
                 {
                     Flights.map(flight => {
-                        return <Space direction="horizontal" style={{ width: '100%', background: '#fafafa', justifyContent: "space-between", padding: 5, margin: '-15px 10px -15px 10px' }}>
+                        return <Space key={flight.flight.iata} direction="horizontal" style={{ width: '100%', background: '#fafafa', justifyContent: "space-between", padding: 5, margin: '-15px 10px -15px 10px' }}>
                             <Text>Date: {flight.flight_date}</Text>
                             <Title level={5}>{`${flight.departure.city} > ${flight.arrival.city}`}</Title>
                             <Text>Price: €{flight.amount}</Text>
